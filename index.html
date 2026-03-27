@@ -60,7 +60,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 40px; 
+            gap: 35px; 
             min-width: 1000px; 
             padding: 20px;
             background: white;
@@ -74,10 +74,11 @@
         }
 
         .level-1 { gap: 0; }
+        .level-1-5 { gap: 80px; margin-top: -15px; } 
         .level-2 { gap: 30px; } 
         .level-3 { gap: 12px; } 
 
-        /* 固定的上層標題樣式 (不翻牌) */
+        /* 固定的上層標題樣式 */
         .static-army {
             width: 220px; 
             height: 65px;
@@ -97,6 +98,20 @@
             margin-top: 5px;
             font-weight: normal;
         }
+
+        /* 旅部與直屬連的小方塊樣式 */
+        .static-sub-dept {
+            width: 100px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1em;
+            color: #ed1c24; 
+        }
+        .pink-bg { background-color: #ffcce6; border: 1px solid #ed1c24; }
+        .white-bg { background-color: white; border: 1px solid #ed1c24; }
 
         /* 翻牌卡片基礎設定 */
         .flashcard-container {
@@ -143,29 +158,40 @@
         /* 背面：解答狀態 */
         .card-back {
             transform: rotateY(180deg); 
+            border: none; 
         }
 
         /* 具體卡片尺寸與樣式 */
         .dept-card { width: 100px; height: 45px; }
-        .dept-card .card-back { border: 1px solid #dc3545; font-size: 1em; color: #333; }
+        .dept-default { border: 1px solid #dc3545; background-color: white; font-size: 1em; color: #333; } 
+        .dept-pink { border: 1px solid #ed1c24; background-color: #ffcce6; font-size: 0.9em; color: #ed1c24; font-weight: bold; }
+        .dept-white { border: 1px solid #ed1c24; background-color: white; font-size: 0.9em; color: #ed1c24; font-weight: bold; }
 
         .unit-card { width: 65px; height: 260px; }
-        .unit-card .card-back { border: 0 !important; justify-content: flex-start; padding-top: 10px; }
+        .unit-card .card-back { justify-content: flex-start; padding-top: 10px; }
 
-        /* ★★★ 單位邊框配色對應 (忠實原圖白色背景+彩色邊框) ★★★ */
-        /* 集團軍旅/陸戰合成旅邊框 */
-        .amphibious-heavy { border: 1px solid #ed1c24; } 
-        .heavy { border: 1px solid #ffc107; } 
-        .medium { border: 1px solid #8bc34a; } 
-        .light { border: 1px solid #e0f7fa; } 
-        .branch { border: 1px solid #fff200; }   
-        /* 新增：空中突擊營邊框 */
-        .air_assault { border: 1px solid #e0f7fa; } 
+        /* ★★★ 單位邊框與底色對應 ★★★ */
+        
+        /* 1. 集團軍原有底色 */
+        .amphibious-heavy { background-color: #b71c1c; border: 1px solid #ed1c24; color: white; } 
+        .amphibious-heavy .person-count { color: white !important; }
+        .heavy { background-color: #ffc107; border: 1px solid #ed1c24; color: #333; } 
+        .medium { background-color: #8bc34a; border: 1px solid #ed1c24; color: #333; } 
+        .light { background-color: #e0f7fa; border: 1px solid #ed1c24; color: #333; } 
+        .branch { background-color: #ffeb3b; border: 1px solid #ed1c24; color: #333; }   
+        
+        /* 2. 海軍陸戰隊 (總體) 各戰區實心配色 (已修復最後三個) */
+        .marines_southern_bg { background-color: #ffeb3b; border: 1px solid #ed1c24; color: #333; }
+        .marines_eastern_bg { background-color: #e0f7fa; border: 1px solid #ed1c24; color: #333; }
+        .marines_northern_bg { background-color: #8bc34a; border: 1px solid #ed1c24; color: #333; }
 
-        /* ★★★ 忠實還原原圖例外：白色背景有紅色邊框 ★★★ */
-        /* 海軍陸戰合成旅：合成營、空突營、兵種營均採用紅色邊框白色底色 */
-        /* 空中突擊旅：所有單位採用紅色邊框白色底色 */
-        .air_assault_unit { border: 1px solid #ed1c24; background-color: white; color: #333; }
+        /* 3. 海軍陸戰合成旅 (各營底色，文字為紅色) */
+        .marine_bat_combat { background-color: #ffc107; border: 1px solid #ed1c24; color: #ed1c24; } 
+        .marine_bat_air { background-color: #e0f7fa; border: 1px solid #ed1c24; color: #ed1c24; } 
+        .marine_bat_branch { background-color: #ffeb3b; border: 1px solid #ed1c24; color: #ed1c24; } 
+
+        /* 4. 空中突擊旅 (白底紅框例外，文字為紅色) */
+        .air_assault_unit { background-color: white; border: 1px solid #ed1c24; color: #ed1c24; }
 
         /* 直排文字處理 */
         .vertical-text {
@@ -179,6 +205,12 @@
             align-items: center;
         }
 
+        /* 針對文字較多的單位，稍微縮小字體以塞入框內 */
+        .long-text {
+            font-size: 0.95em;
+            letter-spacing: 1px;
+        }
+
         /* 人數顯示 */
         .person-count {
             font-size: 0.85em;
@@ -186,7 +218,7 @@
             margin-bottom: 10px;
         }
 
-        /* ★★★ 備註文字框 ★★★ */
+        /* 備註文字框 */
         .remark-box {
             width: 100%;
             max-width: 1000px;
@@ -198,7 +230,7 @@
             font-size: 0.9em;
             color: #666;
             text-align: left;
-            display: none; /* 預設隱藏，有備註才顯示 */
+            display: none; 
         }
 
         /* 控制按鈕 */
@@ -233,7 +265,7 @@
                 <optgroup label="海軍">
                     <option value="marines">海軍陸戰隊 (總體)</option>
                 </optgroup>
-                <optgroup label="範例合成旅/兵種旅 (範例)">
+                <optgroup label="範例合成旅/兵種旅">
                     <option value="marines_合成旅">海軍陸戰合成旅</option>
                     <option value="air_assault_旅">空中突擊旅</option>
                 </optgroup>
@@ -246,11 +278,9 @@
         <div class="org-chart" id="orgChart">
             
             <div class="level level-1" id="level1"></div>
-
+            <div class="level level-1-5" id="level1_5" style="display: none;"></div>
             <div class="level level-2" id="level2"></div>
-
             <div class="level level-3" id="level3"></div>
-
             <div class="remark-box" id="remarkBox"></div>
 
         </div>
@@ -261,124 +291,96 @@
     </div>
 
     <script>
-        // 共用的部門資料
         const defaultDeptsData = [
-            { label: '參謀部' }, { label: '政治部' }, { label: '保障部' }, { label: '裝備部' }, { label: '紀檢部' }
+            { class: 'dept-default', label: '參謀部' }, { class: 'dept-default', label: '政治部' }, 
+            { class: 'dept-default', label: '保障部' }, { class: 'dept-default', label: '裝備部' }, 
+            { class: 'dept-default', label: '紀檢部' }
         ];
 
-        // 資料結構：第71集團軍
         const unitsData_71 = [
-            { class: 'heavy', label: '重型合成2旅', count: '4500' },
-            { class: 'heavy', label: '重型合成35旅', count: '4500' },
-            { class: 'heavy', label: '重型合成160旅', count: '4500' },
-            { class: 'heavy', label: '重型合成235旅', count: '4500' },
-            { class: 'medium', label: '中型合成178旅', count: '4600' },
-            { class: 'light', label: '輕型合成179旅', count: '5000' },
-            { class: 'branch', label: '陸航71旅', count: '2000' },
-            { class: 'branch', label: '砲兵71旅', count: '3000' },
-            { class: 'branch', label: '防空71旅', count: '2500' },
-            { class: 'branch', label: '特戰71旅', count: '2500' },
-            { class: 'branch', label: '工化71旅', count: '2500' },
-            { class: 'branch', label: '勤務支援71旅', count: '2500' }
+            { class: 'heavy', label: '重型合成2旅', count: '4500' }, { class: 'heavy', label: '重型合成35旅', count: '4500' },
+            { class: 'heavy', label: '重型合成160旅', count: '4500' }, { class: 'heavy', label: '重型合成235旅', count: '4500' },
+            { class: 'medium', label: '中型合成178旅', count: '4600' }, { class: 'light', label: '輕型合成179旅', count: '5000' },
+            { class: 'branch', label: '陸航71旅', count: '2000' }, { class: 'branch', label: '砲兵71旅', count: '3000' },
+            { class: 'branch', label: '防空71旅', count: '2500' }, { class: 'branch', label: '特戰71旅', count: '2500' },
+            { class: 'branch', label: '工化71旅', count: '2500' }, { class: 'branch', label: '勤務支援71旅', count: '2500' }
         ];
 
-        // 資料結構：第72集團軍
         const unitsData_72 = [
-            { class: 'amphibious-heavy', label: '兩棲重型合成5旅', count: '4500' },
-            { class: 'amphibious-heavy', label: '兩棲重型合成124旅', count: '4500' },
-            { class: 'heavy', label: '重型合成10旅', count: '4500' },
-            { class: 'medium', label: '中型合成34旅', count: '4600' },
-            { class: 'medium', label: '中型合成85旅', count: '4600' },
-            { class: 'light', label: '輕型合成90旅', count: '5000' },
-            { class: 'branch', label: '陸航72旅', count: '2000' },
-            { class: 'branch', label: '砲兵72旅', count: '3000' },
-            { class: 'branch', label: '防空72旅', count: '2500' },
-            { class: 'branch', label: '特戰72旅', count: '2500' },
-            { class: 'branch', label: '工兵1旅', count: '2500' },
-            { class: 'branch', label: '防化1旅', count: '2500' },
+            { class: 'amphibious-heavy', label: '兩棲重型合成5旅', count: '4500' }, { class: 'amphibious-heavy', label: '兩棲重型合成124旅', count: '4500' },
+            { class: 'heavy', label: '重型合成10旅', count: '4500' }, { class: 'medium', label: '中型合成34旅', count: '4600' },
+            { class: 'medium', label: '中型合成85旅', count: '4600' }, { class: 'light', label: '輕型合成90旅', count: '5000' },
+            { class: 'branch', label: '陸航72旅', count: '2000' }, { class: 'branch', label: '砲兵72旅', count: '3000' },
+            { class: 'branch', label: '防空72旅', count: '2500' }, { class: 'branch', label: '特戰72旅', count: '2500' },
+            { class: 'branch', label: '工兵1旅', count: '2500' }, { class: 'branch', label: '防化1旅', count: '2500' },
             { class: 'branch', label: '勤務支援72旅', count: '2500' }
         ];
 
-        // 資料結構：第73集團軍
         const unitsData_73 = [
-            { class: 'amphibious-heavy', label: '兩棲重型合成14旅', count: '4500' },
-            { class: 'amphibious-heavy', label: '兩棲重型合成91旅', count: '4500' },
-            { class: 'heavy', label: '重型合成86旅', count: '4500' },
-            { class: 'medium', label: '中型合成145旅', count: '4600' },
-            { class: 'light', label: '輕型合成3旅', count: '5000' },
-            { class: 'light', label: '輕型合成92旅', count: '5000' },
-            { class: 'branch', label: '陸航73旅', count: '2000' },
-            { class: 'branch', label: '砲兵73旅', count: '3000' },
-            { class: 'branch', label: '防空73旅', count: '2500' },
-            { class: 'branch', label: '特戰73旅', count: '2500' },
-            { class: 'branch', label: '工化73旅', count: '2500' },
-            { class: 'branch', label: '勤務支援73旅', count: '2500' }
+            { class: 'amphibious-heavy', label: '兩棲重型合成14旅', count: '4500' }, { class: 'amphibious-heavy', label: '兩棲重型合成91旅', count: '4500' },
+            { class: 'heavy', label: '重型合成86旅', count: '4500' }, { class: 'medium', label: '中型合成145旅', count: '4600' },
+            { class: 'light', label: '輕型合成3旅', count: '5000' }, { class: 'light', label: '輕型合成92旅', count: '5000' },
+            { class: 'branch', label: '陸航73旅', count: '2000' }, { class: 'branch', label: '砲兵73旅', count: '3000' },
+            { class: 'branch', label: '防空73旅', count: '2500' }, { class: 'branch', label: '特戰73旅', count: '2500' },
+            { class: 'branch', label: '工化73旅', count: '2500' }, { class: 'branch', label: '勤務支援73旅', count: '2500' }
         ];
 
-        // 資料結構：海軍陸戰隊 (總體)
+        // ★★★ 已修復：後三個單位現在皆為直排且有實心底色 ★★★
         const unitsData_Marines = [
-            { class: 'marines_southern_bg', type: 'unit', label: '陸戰1旅', count: '4500' },
-            { class: 'marines_southern_bg', type: 'unit', label: '陸戰2旅', count: '4500' },
-            { class: 'marines_eastern_bg', type: 'unit', label: '陸戰3旅', count: '4500' },
-            { class: 'marines_eastern_bg', type: 'unit', label: '陸戰4旅', count: '4500' },
-            { class: 'marines_northern_bg', type: 'unit', label: '陸戰5旅', count: '4500' },
-            { class: 'marines_northern_bg', type: 'unit', label: '陸戰6旅', count: '4500' },
-            { class: 'marines_southern_border', type: 'special_unit', label: '特種作戰旅', count: '2000' },
-            { class: 'marines_eastern_border', type: 'special_unit', label: '艦載機航空兵旅', count: '2000' },
-            { class: 'marines_southern_border', type: 'base', label: '陸戰隊訓練基地', count: '1000' }
+            { class: 'marines_southern_bg', type: 'unit', label: '陸戰1旅', count: '4500' }, { class: 'marines_southern_bg', type: 'unit', label: '陸戰2旅', count: '4500' },
+            { class: 'marines_eastern_bg', type: 'unit', label: '陸戰3旅', count: '4500' }, { class: 'marines_eastern_bg', type: 'unit', label: '陸戰4旅', count: '4500' },
+            { class: 'marines_northern_bg', type: 'unit', label: '陸戰5旅', count: '4500' }, { class: 'marines_northern_bg', type: 'unit', label: '陸戰6旅', count: '4500' },
+            { class: 'marines_southern_bg', type: 'unit', label: '特種作戰旅', count: '2000' }, 
+            { class: 'marines_eastern_bg', type: 'unit', label: '艦載機航空兵旅', count: '2000' },
+            { class: 'marines_southern_bg', type: 'unit', label: '陸戰隊訓練基地', count: '1000' }
         ];
 
-        // ★★★ 資料結構：海軍陸戰合成旅 (image_6.png) ★★★
+        const deptsData_Marines_合成旅 = [
+            { class: 'dept-pink', label: '政工科' }, { class: 'dept-pink', label: '偵察科' }, 
+            { class: 'dept-pink', label: '作訓科' }, { class: 'dept-pink', label: '火力科' }, 
+            { class: 'dept-pink', label: '信息保障科' }, { class: 'dept-pink', label: '裝備管理科' }
+        ];
         const unitsData_Marines_合成旅 = [
-            { class: 'air_assault_unit', label: '陸戰重型合成營', count: '500' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '陸戰重型合成營', count: '500' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '陸戰中型合成營', count: '500' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '空中突擊營', count: '400' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '偵察營', count: '300' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '砲兵營', count: '400' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '防空營', count: '450' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '作戰支援營', count: '400' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '勤務保障營', count: '300' }  // 注意：忠實原圖紅色邊框例外
+            { class: 'marine_bat_combat', label: '陸戰重型合成營', count: '500' }, { class: 'marine_bat_combat', label: '陸戰重型合成營', count: '500' },
+            { class: 'marine_bat_combat', label: '陸戰中型合成營', count: '500' }, { class: 'marine_bat_air', label: '空中突擊營', count: '400' },
+            { class: 'marine_bat_branch', label: '偵察營', count: '300' }, { class: 'marine_bat_branch', label: '砲兵營', count: '400' },
+            { class: 'marine_bat_branch', label: '防空營', count: '450' }, { class: 'marine_bat_branch', label: '作戰支援營', count: '400' },
+            { class: 'marine_bat_branch', label: '勤務保障營', count: '300' }
         ];
 
-        // ★★★ 資料結構：空中突擊旅 (image_7.png) ★★★
-        // 注意：空中突擊旅科組（depts）只有5個
         const deptsData_Air_Assault = [
-            { label: '政工科' }, { label: '偵察科' }, { label: '作訓科' }, { label: '火力科' }, { label: '裝備管理科' }
+            { class: 'dept-white', label: '政工科' }, { class: 'dept-white', label: '偵察科' }, 
+            { class: 'dept-white', label: '作訓科' }, { class: 'dept-white', label: '火力科' }, 
+            { class: 'dept-white', label: '裝備管理科' }
         ];
         const unitsData_Air_Assault = [
-            { class: 'air_assault_unit', label: '偵察直升機營', count: '200' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '攻擊直升機營', count: '200' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '攻擊直升機營', count: '200' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '運輸直升機營', count: '200' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '運輸直升機營', count: '200' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '運輸直升機營', count: '200' }, // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '突擊步兵營', count: '500' },   // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '突擊步兵營', count: '500' },   // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '突擊步兵營', count: '500' },   // 注意：忠實原圖紅色邊框例外
-            { class: 'air_assault_unit', label: '勤務保障營', count: '300' }    // 注意：忠實原圖紅色邊框例外
+            { class: 'air_assault_unit', label: '偵察直升機營', count: '200' }, { class: 'air_assault_unit', label: '攻擊直升機營', count: '200' }, 
+            { class: 'air_assault_unit', label: '攻擊直升機營', count: '200' }, { class: 'air_assault_unit', label: '運輸直升機營', count: '200' }, 
+            { class: 'air_assault_unit', label: '運輸直升機營', count: '200' }, { class: 'air_assault_unit', label: '運輸直升機營', count: '200' }, 
+            { class: 'air_assault_unit', label: '突擊步兵營', count: '500' }, { class: 'air_assault_unit', label: '突擊步兵營', count: '500' },   
+            { class: 'air_assault_unit', label: '突擊步兵營', count: '500' }, { class: 'air_assault_unit', label: '勤務保障營', count: '300' }    
         ];
 
         const level1 = document.getElementById('level1');
+        const level1_5 = document.getElementById('level1_5');
         const level2 = document.getElementById('level2');
         const level3 = document.getElementById('level3');
         const remarkBox = document.getElementById('remarkBox');
         const selector = document.getElementById('armySelector');
 
-        // 核心函式：根據選定的部隊載入組織圖
         function loadArmyChart(unitId) {
-            // 清空目前的內容
             level1.innerHTML = '';
+            level1_5.innerHTML = '';
+            level1_5.style.display = 'none';
             level2.innerHTML = '';
             level3.innerHTML = '';
             remarkBox.innerHTML = '';
             remarkBox.style.display = 'none';
 
-            // ★★★ 生成例外情況：固定的上層標題 (不翻牌) ★★★
             let armyName;
             let personCount;
             let units;
-            let depts = defaultDeptsData; // 預設使用 default depts
+            let depts = defaultDeptsData; 
             let remarkText;
 
             if (unitId === 'marines') {
@@ -389,13 +391,26 @@
                 armyName = '海軍陸戰合成旅';
                 personCount = '約4500人';
                 units = unitsData_Marines_合成旅;
+                depts = deptsData_Marines_合成旅;
                 remarkText = '陸戰合成旅下轄三個合成營及空突營及五個兵種營';
+                
+                level1_5.style.display = 'flex';
+                level1_5.innerHTML = `
+                    <div class="static-sub-dept pink-bg">旅　　部</div>
+                    <div class="static-sub-dept pink-bg">直 屬 連</div>
+                `;
             } else if (unitId === 'air_assault_旅') {
                 armyName = '空中突擊旅';
                 personCount = '約3000人';
                 units = unitsData_Air_Assault;
-                depts = deptsData_Air_Assault; // 空突旅科組例外
+                depts = deptsData_Air_Assault;
                 remarkText = '共軍陸軍空中突擊旅編組於75集團軍空突121旅、83集團軍空突161旅及及空降兵軍空突130旅。';
+
+                level1_5.style.display = 'flex';
+                level1_5.innerHTML = `
+                    <div class="static-sub-dept white-bg">旅　　部</div>
+                    <div class="static-sub-dept white-bg">直 屬 連</div>
+                `;
             } else {
                 armyName = `第${unitId}集團軍`;
                 personCount = '約45000-50000人';
@@ -411,20 +426,15 @@
                 </div>
             `;
 
-            // 生成部門卡片 (翻牌)
             depts.forEach(dept => createFlashCard(dept, 'dept', level2));
-
-            // 生成單位級卡片 (翻牌)
             units.forEach(unit => createFlashCard(unit, 'unit', level3));
 
-            // 生成備註文字
             if (remarkText) {
                 remarkBox.innerHTML = remarkText;
                 remarkBox.style.display = 'block';
             }
         }
 
-        // 產生卡片的函式 (只處理翻牌卡片)
         function createFlashCard(data, type, container) {
             const cardWrapper = document.createElement('div');
             cardWrapper.className = `flashcard-container ${type}-card`;
@@ -440,26 +450,17 @@
             front.textContent = '?';
 
             const back = document.createElement('div');
-            // 初始化 card-back 類別，並應用配色 class 為 border 配色
             back.className = `card-face card-back ${data.class || ''}`; 
 
-            // ★★★ 處理不同單位的呈現例外 ★★★
             if (type === 'unit') {
-                if (data.type === 'base') {
-                    // 陸戰隊訓練基地例外
-                    back.innerHTML = `
-                        <div>${data.label}</div>
-                        <div class="person-count">${data.count}</div>
-                    `;
-                } else {
-                    // 一般旅/營級單位：忠實原圖直排文字
-                    back.innerHTML = `
-                        <div class="vertical-text">${data.label}</div>
-                        <div class="person-count">${data.count}</div>
-                    `;
-                }
+                // 如果文字太長，加上 long-text 的 class 來稍微縮小字體
+                let textClass = data.label.length >= 7 ? 'vertical-text long-text' : 'vertical-text';
+                
+                back.innerHTML = `
+                    <div class="${textClass}">${data.label}</div>
+                    <div class="person-count" style="${data.class === 'amphibious-heavy' ? 'color:white;' : ''}">${data.count}</div>
+                `;
             } else {
-                // 部門卡片：一般橫排
                 back.innerHTML = `<div>${data.label}</div>`;
             }
 
@@ -469,17 +470,14 @@
             container.appendChild(cardWrapper);
         }
 
-        // 監聽下拉式選單變化
         selector.onchange = function() {
             loadArmyChart(this.value);
         };
 
-        // 重置按鈕
         document.getElementById('resetBtn').onclick = () => {
             document.querySelectorAll('.flashcard').forEach(card => card.classList.remove('is-flipped'));
         };
 
-        // 初始化：預設載入第71集團軍
         loadArmyChart('71');
 
     </script>
