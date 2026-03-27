@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共軍集團軍編組 - 互動式記憶測驗</title>
+    <style>
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden; 
+        }
+
+        /* 下拉式選單區塊 */
+        .header {
+            width: 100%;
+            max-width: 1500px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .selector-label {
+            font-size: 1.1em;
+            color: #555;
+            margin-right: 10px;
+        }
+        select {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #f7f9fc;
+        }
+
+        /* 組織圖排版容器 */
+        .org-chart-wrapper {
+            width: 100%;
+            overflow-x: auto; 
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px; 
+            min-width: 1000px; 
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .level {
+            display: flex;
+            justify-content: center;
+        }
+
+        .level-1 { gap: 0; }
+        .level-2 { gap: 30px; } 
+        .level-3 { gap: 12px; } 
+
+        /* 例外情況：固定的集團軍樣式 (不翻牌) */
+        .static-army {
+            width: 220px; 
+            height: 65px;
+            border: 3px solid #ed1c24;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold; 
+            font-size: 1.3em;
+            color: #333;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        .static-army .person-count {
+            font-size: 0.6em;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+
+        /* 翻牌卡片基礎設定 */
+        .flashcard-container {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: white;
+            box-sizing: border-box;
+        }
+
+        /* 正面：加密/空白狀態 (考題) */
+        .card-front {
+            background-color: #e9ecef;
+            color: #adb5bd;
+            border: 1px dashed #ced4da;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        /* 背面：解答狀態 */
+        .card-back {
+            transform: rotateY(180deg); 
+        }
+
+        /* 具體卡片尺寸與樣式 */
+        .dept-card { width: 100px; height: 45px; }
+        .dept-card .card-back { border: 1px solid #dc3545; font-size: 1em; color: #333; }
+
+        .unit-card { width: 65px; height: 260px; }
+        .unit-card .card-back { border: 1px solid #ed1c24; justify-content: flex-start; padding-top: 10px; }
+
+        /* 單位底色對應 */
+        .amphibious-heavy { background-color: #b71c1c; color: white; } /* 深紅：兩棲重型 */
+        .amphibious-heavy + div { color: white !important; } 
+        .heavy { background-color: #ffc107; } /* 橘黃：重型 */
+        .medium { background-color: #8bc34a; } /* 綠色：中型 */
+        .light { background-color: #e0f7fa; } /* 淺藍：輕型 */
+        .branch { background-color: #ffeb3b; }   /* 黃色：兵種 */
+
+        /* 直排文字處理 */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright; 
+            letter-spacing: 2px;
+            font-weight: bold;
+            font-size: 1.1em;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 人數顯示 */
+        .person-count {
+            font-size: 0.85em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* 控制按鈕 */
+        .controls {
+            margin-top: 25px;
+        }
+        button {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-size: 1em;
+        }
+        button:hover { background-color: #0056b3; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>共軍集團軍編組 - 記憶測驗</h1>
+        <div class="selector-container">
+            <span class="selector-label">選擇集團軍：</span>
+            <select id="armySelector">
+                <option value="71">第71集團軍</option>
+                <option value="72">第72集團軍</option>
+                <option value="73" selected>第73集團軍</option>
+            </select>
+        </div>
+        <p style="color: #666; margin-top: 15px; margin-bottom: 0;">提示：集團軍標題固定顯示。部門與旅級單位已蓋牌，點擊空白框框翻牌。</p>
+    </div>
+
+    <div class="org-chart-wrapper">
+        <div class="org-chart" id="orgChart">
+            
+            <div class="level level-1" id="level1"></div>
+
+            <div class="level level-2" id="level2"></div>
+
+            <div class="level level-3" id="level3"></div>
+
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="resetBtn">重新測驗 (全部蓋上)</button>
+    </div>
+
+    <script>
+        // 共用的部門資料
+        const defaultDeptsData = [
+            { label: '參謀部' }, { label: '政治部' }, { label: '保障部' }, { label: '裝備部' }, { label: '紀檢部' }
+        ];
+
+        // 資料結構：第71集團軍
+        const unitsData_71 = [
+            { class: 'heavy', label: '重型合成2旅', count: '4500' },
+            { class: 'heavy', label: '重型合成35旅', count: '4500' },
+            { class: 'heavy', label: '重型合成160旅', count: '4500' },
+            { class: 'heavy', label: '重型合成235旅', count: '4500' },
+            { class: 'medium', label: '中型合成178旅', count: '4600' },
+            { class: 'light', label: '輕型合成179旅', count: '5000' },
+            { class: 'branch', label: '陸航71旅', count: '2000' },
+            { class: 'branch', label: '砲兵71旅', count: '3000' },
+            { class: 'branch', label: '防空71旅', count: '2500' },
+            { class: 'branch', label: '特戰71旅', count: '2500' },
+            { class: 'branch', label: '工化71旅', count: '2500' },
+            { class: 'branch', label: '勤務支援71旅', count: '2500' }
+        ];
+
+        // 資料結構：第72集團軍
+        const unitsData_72 = [
+            { class: 'amphibious-heavy', label: '兩棲重型合成5旅', count: '4500' },
+            { class: 'amphibious-heavy', label: '兩棲重型合成124旅', count: '4500' },
+            { class: 'heavy', label: '重型合成10旅', count: '4500' },
+            { class: 'medium', label: '中型合成34旅', count: '4600' },
+            { class: 'medium', label: '中型合成85旅', count: '4600' },
+            { class: 'light', label: '輕型合成90旅', count: '5000' },
+            { class: 'branch', label: '陸航72旅', count: '2000' },
+            { class: 'branch', label: '砲兵72旅', count: '3000' },
+            { class: 'branch', label: '防空72旅', count: '2500' },
+            { class: 'branch', label: '特戰72旅', count: '2500' },
+            { class: 'branch', label: '工兵1旅', count: '2500' },
+            { class: 'branch', label: '防化1旅', count: '2500' },
+            { class: 'branch', label: '勤務支援72旅', count: '2500' }
+        ];
+
+        // ★★★ 資料結構：第73集團軍 ★★★
+        const unitsData_73 = [
+            { class: 'amphibious-heavy', label: '兩棲重型合成14旅', count: '4500' },
+            { class: 'amphibious-heavy', label: '兩棲重型合成91旅', count: '4500' },
+            { class: 'heavy', label: '重型合成86旅', count: '4500' },
+            { class: 'medium', label: '中型合成145旅', count: '4600' },
+            { class: 'light', label: '輕型合成3旅', count: '5000' },
+            { class: 'light', label: '輕型合成92旅', count: '5000' },
+            { class: 'branch', label: '陸航73旅', count: '2000' },
+            { class: 'branch', label: '砲兵73旅', count: '3000' },
+            { class: 'branch', label: '防空73旅', count: '2500' },
+            { class: 'branch', label: '特戰73旅', count: '2500' },
+            { class: 'branch', label: '工化73旅', count: '2500' },
+            { class: 'branch', label: '勤務支援73旅', count: '2500' }
+        ];
+
+        const level1 = document.getElementById('level1');
+        const level2 = document.getElementById('level2');
+        const level3 = document.getElementById('level3');
+        const selector = document.getElementById('armySelector');
+
+        // 核心函式：根據選定的集團軍載入組織圖
+        function loadArmyChart(armyId) {
+            // 清空目前的內容
+            level1.innerHTML = '';
+            level2.innerHTML = '';
+            level3.innerHTML = '';
+
+            // 固定的集團軍 (不可翻牌)
+            const armyName = `第${armyId}集團軍`;
+            level1.innerHTML = `
+                <div class="static-army">
+                    <div>${armyName}</div>
+                    <div class="person-count">約45000-50000人</div>
+                </div>
+            `;
+
+            // 獲取選定的單位資料
+            let units;
+            if (armyId === '71') units = unitsData_71;
+            else if (armyId === '72') units = unitsData_72;
+            else if (armyId === '73') units = unitsData_73;
+
+            // 生成部門卡片 (翻牌)
+            defaultDeptsData.forEach(dept => createFlashCard(dept, 'dept', level2));
+
+            // 生成單位卡片 (翻牌)
+            units.forEach(unit => createFlashCard(unit, 'unit', level3));
+        }
+
+        // 產生卡片的函式
+        function createFlashCard(data, type, container) {
+            const cardWrapper = document.createElement('div');
+            cardWrapper.className = `flashcard-container ${type}-card`;
+            cardWrapper.onclick = function() {
+                this.querySelector('.flashcard').classList.toggle('is-flipped');
+            };
+
+            const flashcard = document.createElement('div');
+            flashcard.className = 'flashcard';
+
+            const front = document.createElement('div');
+            front.className = 'card-face card-front';
+            front.textContent = '?';
+
+            const back = document.createElement('div');
+            back.className = `card-face card-back ${data.class || ''}`;
+
+            if (type === 'unit') {
+                back.innerHTML = `
+                    <div class="vertical-text">${data.label}</div>
+                    <div class="person-count">${data.count}</div>
+                `;
+            } else {
+                back.innerHTML = `<div>${data.label}</div>`;
+            }
+
+            flashcard.appendChild(front);
+            flashcard.appendChild(back);
+            cardWrapper.appendChild(flashcard);
+            container.appendChild(cardWrapper);
+        }
+
+        // 監聽下拉式選單變化
+        selector.onchange = function() {
+            loadArmyChart(this.value);
+        };
+
+        // 重置按鈕
+        document.getElementById('resetBtn').onclick = () => {
+            document.querySelectorAll('.flashcard').forEach(card => card.classList.remove('is-flipped'));
+        };
+
+        // 初始化：預設載入第73集團軍 (因為剛新增)
+        loadArmyChart('73');
+
+    </script>
+</body>
+</html>
