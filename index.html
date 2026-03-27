@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>共軍集團軍編組 - 互動式記憶測驗</title>
+    <title>共軍部隊編組 - 互動式記憶測驗 Pro</title>
     <style>
         body {
             font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
@@ -77,7 +77,7 @@
         .level-2 { gap: 30px; } 
         .level-3 { gap: 12px; } 
 
-        /* 例外情況：固定的集團軍樣式 (不翻牌) */
+        /* 固定的上層標題樣式 (不翻牌) */
         .static-army {
             width: 220px; 
             height: 65px;
@@ -150,15 +150,29 @@
         .dept-card .card-back { border: 1px solid #dc3545; font-size: 1em; color: #333; }
 
         .unit-card { width: 65px; height: 260px; }
-        .unit-card .card-back { border: 1px solid #ed1c24; justify-content: flex-start; padding-top: 10px; }
+        /* 移除 default 邊框，將邊框樣式放入單獨的配色 class 中 */
+        .unit-card .card-back { border: 0 !important; justify-content: flex-start; padding: 0 !important; }
 
-        /* 單位底色對應 */
-        .amphibious-heavy { background-color: #b71c1c; color: white; } /* 深紅：兩棲重型 */
+        /* 集團軍旅配色：orange border + background for vertical text */
+        .amphibious-heavy { background-color: #b71c1c; border: 1px solid #ed1c24; } 
         .amphibious-heavy + div { color: white !important; } 
-        .heavy { background-color: #ffc107; } /* 橘黃：重型 */
-        .medium { background-color: #8bc34a; } /* 綠色：中型 */
-        .light { background-color: #e0f7fa; } /* 淺藍：輕型 */
-        .branch { background-color: #ffeb3b; }   /* 黃色：兵種 */
+        .heavy { background-color: #ffc107; border: 1px solid #ed1c24; } 
+        .medium { background-color: #8bc34a; border: 1px solid #ed1c24; } 
+        .light { background-color: #e0f7fa; border: 1px solid #ed1c24; } 
+        .branch { background-color: #ffeb3b; border: 1px solid #ed1c24; }   
+
+        /* ★★★ 海軍陸戰隊各戰區配色 ★★★ */
+        /* Regular Marines Brigade: background color for vertical text, no padding added by class, text has colored border box */
+        .marines_southern_bg { background-color: #ffc107; border: 1px solid #ed1c24; }
+        .marines_eastern_bg { background-color: #e0f7fa; border: 1px solid #ed1c24; }
+        .marines_northern_bg { background-color: #8bc34a; border: 1px solid #ed1c24; }
+        /* Special text color handling */
+        .marines_northern_bg, .marines_northern_bg + div { color: white !important; }
+
+        /* Specialized Marines Unit/Training Base: background is white, border is the warzone color */
+        .marines_southern_border { border: 2px solid #ffc107; background-color: white; color: #333; }
+        .marines_eastern_border { border: 2px solid #e0f7fa; background-color: white; color: #333; }
+        .marines_northern_border { border: 2px solid #8bc34a; background-color: white; color: #333; }
 
         /* 直排文字處理 */
         .vertical-text {
@@ -199,16 +213,21 @@
 <body>
 
     <div class="header">
-        <h1>共軍集團軍編組 - 記憶測驗</h1>
+        <h1>共軍部隊編組 - 記憶測驗</h1>
         <div class="selector-container">
-            <span class="selector-label">選擇集團軍：</span>
+            <span class="selector-label">選擇部隊：</span>
             <select id="armySelector">
-                <option value="71">第71集團軍</option>
-                <option value="72">第72集團軍</option>
-                <option value="73" selected>第73集團軍</option>
+                <optgroup label="陸軍 (集團軍)">
+                    <option value="71" selected>第71集團軍</option>
+                    <option value="72">第72集團軍</option>
+                    <option value="73">第73集團軍</option>
+                </optgroup>
+                <optgroup label="海軍">
+                    <option value="marines">海軍陸戰隊</option>
+                </optgroup>
             </select>
         </div>
-        <p style="color: #666; margin-top: 15px; margin-bottom: 0;">提示：集團軍標題固定顯示。部門與旅級單位已蓋牌，點擊空白框框翻牌。</p>
+        <p style="color: #666; margin-top: 15px; margin-bottom: 0;">提示：最上方標題固定顯示。部門與旅/基地級單位已蓋牌，點擊空白框框翻牌。</p>
     </div>
 
     <div class="org-chart-wrapper">
@@ -266,7 +285,7 @@
             { class: 'branch', label: '勤務支援72旅', count: '2500' }
         ];
 
-        // ★★★ 資料結構：第73集團軍 ★★★
+        // 資料結構：第73集團軍
         const unitsData_73 = [
             { class: 'amphibious-heavy', label: '兩棲重型合成14旅', count: '4500' },
             { class: 'amphibious-heavy', label: '兩棲重型合成91旅', count: '4500' },
@@ -282,41 +301,63 @@
             { class: 'branch', label: '勤務支援73旅', count: '2500' }
         ];
 
+        // ★★★ 資料結構：海軍陸戰隊 ★★★
+        const unitsData_Marines = [
+            { class: 'marines_southern_bg', type: 'unit', label: '陸戰1旅', count: '4500' }, // 黃色
+            { class: 'marines_southern_bg', type: 'unit', label: '陸戰2旅', count: '4500' }, // 黃色
+            { class: 'marines_eastern_bg', type: 'unit', label: '陸戰3旅', count: '4500' }, // 淺藍色
+            { class: 'marines_eastern_bg', type: 'unit', label: '陸戰4旅', count: '4500' }, // 淺藍色
+            { class: 'marines_northern_bg', type: 'unit', label: '陸戰5旅', count: '4500' }, // 綠色
+            { class: 'marines_northern_bg', type: 'unit', label: '陸戰6旅', count: '4500' }, // 綠色
+            { class: 'marines_southern_border', type: 'special_unit', label: '特種作戰旅', count: '2000' }, // specialized color border, vertical text
+            { class: 'marines_eastern_border', type: 'special_unit', label: '艦載機航空兵旅', count: '2000' }, // specialized color border, vertical text
+            { class: 'marines_southern_border', type: 'base', label: '陸戰隊訓練基地', count: '1000' } // specialized color border, horizontal text
+        ];
+
         const level1 = document.getElementById('level1');
         const level2 = document.getElementById('level2');
         const level3 = document.getElementById('level3');
         const selector = document.getElementById('armySelector');
 
-        // 核心函式：根據選定的集團軍載入組織圖
-        function loadArmyChart(armyId) {
+        // 核心函式：根據選定的部隊載入組織圖
+        function loadArmyChart(unitId) {
             // 清空目前的內容
             level1.innerHTML = '';
             level2.innerHTML = '';
             level3.innerHTML = '';
 
-            // 固定的集團軍 (不可翻牌)
-            const armyName = `第${armyId}集團軍`;
+            // ★★★ 生成例外情況：固定的上層標題 (不翻牌) ★★★
+            let armyName;
+            let personCount;
+            let units;
+
+            if (unitId === 'marines') {
+                armyName = '海軍陸戰隊';
+                personCount = '約30000-35000人';
+                units = unitsData_Marines;
+            } else {
+                armyName = `第${unitId}集團軍`;
+                personCount = '約45000-50000人';
+                if (unitId === '71') units = unitsData_71;
+                else if (unitId === '72') units = unitsData_72;
+                else if (unitId === '73') units = unitsData_73;
+            }
+
             level1.innerHTML = `
                 <div class="static-army">
                     <div>${armyName}</div>
-                    <div class="person-count">約45000-50000人</div>
+                    <div class="person-count">${personCount}</div>
                 </div>
             `;
-
-            // 獲取選定的單位資料
-            let units;
-            if (armyId === '71') units = unitsData_71;
-            else if (armyId === '72') units = unitsData_72;
-            else if (armyId === '73') units = unitsData_73;
 
             // 生成部門卡片 (翻牌)
             defaultDeptsData.forEach(dept => createFlashCard(dept, 'dept', level2));
 
-            // 生成單位卡片 (翻牌)
+            // 生成單位級卡片 (翻牌)
             units.forEach(unit => createFlashCard(unit, 'unit', level3));
         }
 
-        // 產生卡片的函式
+        // 產生卡片的函式 (只處理翻牌卡片)
         function createFlashCard(data, type, container) {
             const cardWrapper = document.createElement('div');
             cardWrapper.className = `flashcard-container ${type}-card`;
@@ -332,14 +373,38 @@
             front.textContent = '?';
 
             const back = document.createElement('div');
-            back.className = `card-face card-back ${data.class || ''}`;
+            // 初始化 card-back 類別，不帶預設邊框
+            back.className = `card-face card-back`; 
 
+            // ★★★ 處理不同單位的呈現例外 ★★★
             if (type === 'unit') {
-                back.innerHTML = `
-                    <div class="vertical-text">${data.label}</div>
-                    <div class="person-count">${data.count}</div>
-                `;
+                // 將配色 class 直接加入 card-back
+                back.className += ` ${data.class || ''}`;
+
+                if (data.type === 'base') {
+                    // ★★★ 例外 1：訓練基地採用水平文字，彩色邊框 ★★★
+                    back.style.padding = '10px 5px'; // 特別 padding
+                    back.innerHTML = `
+                        <div>${data.label}</div>
+                        <div class="person-count">${data.count}</div>
+                    `;
+                } else if (data.type === 'special_unit') {
+                    // ★★★ 例外 2：特種作戰/航空兵旅採用彩色邊框、白色底色，文字直排 ★★★
+                    back.innerHTML = `
+                        <div class="vertical-text" style="padding-top:10px">${data.label}</div>
+                        <div class="person-count">${data.count}</div>
+                    `;
+                } else {
+                    // ★★★ 一般旅級單位：彩色文字底色，文字直排 ★★★
+                    // 加入預設的直排文字 padding
+                    back.style.paddingTop = '10px';
+                    back.innerHTML = `
+                        <div class="vertical-text">${data.label}</div>
+                        <div class="person-count">${data.count}</div>
+                    `;
+                }
             } else {
+                // 部門卡片：一般橫排
                 back.innerHTML = `<div>${data.label}</div>`;
             }
 
@@ -359,8 +424,8 @@
             document.querySelectorAll('.flashcard').forEach(card => card.classList.remove('is-flipped'));
         };
 
-        // 初始化：預設載入第73集團軍 (因為剛新增)
-        loadArmyChart('73');
+        // 初始化：預設載入第71集團軍
+        loadArmyChart('71');
 
     </script>
 </body>
