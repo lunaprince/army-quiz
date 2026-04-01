@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>共軍裝備識別 - 隨機配對測驗</title>
+    <title>共軍裝備識別 - 共同選項配對測驗</title>
     <style>
         body {
             font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
@@ -15,9 +15,32 @@
             padding: 20px;
         }
 
+        /* 頂部導覽列 (保留讓你可以切換回組織圖) */
+        .nav-bar {
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 0 10px;
+            border-radius: 5px;
+            background-color: #555;
+            transition: background 0.2s;
+            display: inline-block;
+        }
+        .nav-bar a:hover { background-color: #777; }
+
         .header {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             background-color: white;
             padding: 20px;
             border-radius: 12px;
@@ -26,17 +49,13 @@
             text-align: center;
         }
 
-        h1 {
-            color: #1a1a1a;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.8em;
-        }
-
+        h1 { color: #1a1a1a; margin-top: 0; margin-bottom: 10px; font-size: 1.8em; }
+        
         .instructions {
-            color: #666;
+            color: #555;
             margin-bottom: 20px;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-size: 1.05em;
         }
 
         .top-controls {
@@ -55,19 +74,65 @@
             border: none;
             transition: background 0.2s, transform 0.1s;
         }
-
         .btn-primary { background-color: #007bff; color: white; }
         .btn-primary:hover { background-color: #0056b3; }
-        .btn-primary:active { transform: scale(0.97); }
-
         .btn-success { background-color: #28a745; color: white; }
         .btn-success:hover { background-color: #218838; }
-        .btn-success:active { transform: scale(0.97); }
 
-        /* 測驗網格 */
+        /* =========================================
+           共同選項池區塊
+           ========================================= */
+        .options-pool-container {
+            width: 100%;
+            max-width: 1400px;
+            background-color: #fff9e6; /* 稍微帶點黃色背景突顯選項區 */
+            border: 2px solid #ffeeba;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-sizing: border-box;
+        }
+
+        .options-pool-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ffeeba;
+            padding-bottom: 10px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px 20px;
+        }
+
+        .option-item {
+            font-size: 1em;
+            color: #333;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 10px;
+            min-width: 25px;
+        }
+
+        /* =========================================
+           圖片測驗區塊
+           ========================================= */
         .quiz-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 20px;
             width: 100%;
             max-width: 1400px;
@@ -83,16 +148,31 @@
             flex-direction: column;
             align-items: center;
             border: 2px solid transparent;
-            transition: border-color 0.3s;
+            position: relative;
         }
 
-        /* 狀態樣式 */
         .quiz-card.correct { border-color: #28a745; background-color: #f8fff9; }
         .quiz-card.incorrect { border-color: #dc3545; background-color: #fffafb; }
 
+        .q-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #333;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 2;
+        }
+
         .img-container {
             width: 100%;
-            height: 200px;
+            height: 180px;
             background-color: #f8f9fa;
             border-radius: 8px;
             margin-bottom: 15px;
@@ -101,6 +181,7 @@
             justify-content: center;
             overflow: hidden;
             border: 1px solid #eee;
+            position: relative;
         }
 
         .img-container img {
@@ -109,17 +190,26 @@
             object-fit: contain;
         }
 
-        select {
+        .answer-area {
             width: 100%;
-            padding: 10px;
-            font-size: 1em;
-            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        select {
+            padding: 8px 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: 2px solid #ccc;
             border-radius: 6px;
             background-color: white;
             cursor: pointer;
             outline: none;
+            width: 100px;
+            text-align: center;
         }
-        
         select:focus { border-color: #007bff; }
 
         .result-msg {
@@ -128,11 +218,21 @@
             font-weight: bold;
             text-align: center;
             min-height: 20px;
+            width: 100%;
         }
 
         .correct-text { color: #28a745; }
         .incorrect-text { color: #dc3545; }
-        .true-answer { color: #333; font-size: 0.85em; margin-top: 5px; background: #fff3cd; padding: 4px 8px; border-radius: 4px; border: 1px solid #ffeeba;}
+        .true-answer { 
+            color: #333; 
+            font-size: 0.85em; 
+            margin-top: 5px; 
+            background: #fff3cd; 
+            padding: 6px; 
+            border-radius: 4px; 
+            border: 1px solid #ffeeba;
+            word-break: break-word;
+        }
 
         #score-display {
             font-size: 1.5em;
@@ -143,27 +243,32 @@
             text-align: center;
         }
 
-        /* 手機板適配 */
-        @media (max-width: 600px) {
-            .top-controls { flex-direction: column; }
-            .btn { width: 100%; }
-        }
-
     </style>
 </head>
 <body>
 
+    <div class="nav-bar">
+        <a href="index.html">📊 組織編組測驗</a>
+        <a href="match.html">🚜 裝備配對測驗</a>
+    </div>
+
     <div class="header">
-        <h1>共軍裝備識別 - 隨機配對測驗</h1>
+        <h1>共軍裝備識別 - 共同選項配對測驗</h1>
         <p class="instructions">
-            系統已為您隨機抽取 <strong>10 張裝備圖片</strong>，請從下拉選單的 <strong>25 個選項</strong>中，找出對應的正確裝備名稱。<br>
-            作答完畢後，點擊「送出答案」查看成績與正確解答。
+            請參考下方黃色區塊的<strong>「裝備選項池」</strong>，為底下 10 張圖片選擇正確的<strong>英文代號</strong>。<br>
+            作答完畢後，點擊「送出答案」查看成績。
         </p>
         <div class="top-controls">
             <button class="btn btn-primary" onclick="startQuiz()">🔄 開始新測驗 (重新抽題)</button>
             <button class="btn btn-success" id="submitBtn" onclick="checkAnswers()" style="display: none;">✅ 送出答案</button>
         </div>
         <div id="score-display"></div>
+    </div>
+
+    <div class="options-pool-container" id="optionsPool" style="display: none;">
+        <div class="options-pool-title">📋 裝備選項總表 (請將代號填入圖片下方)</div>
+        <div class="options-grid" id="optionsGrid">
+            </div>
     </div>
 
     <div class="quiz-grid" id="quizGrid">
@@ -272,18 +377,27 @@
         ];
 
         let currentQuestions = [];
-        let currentOptions = [];
+        let currentOptionsDict = {}; // 用於儲存 {代號: 裝備名稱} 供檢查答案
+
+        // 產生 A 到 Y 的英文字母陣列 (25個)
+        const generateAlphabet = () => {
+            return Array.from({length: 25}, (_, i) => String.fromCharCode(65 + i));
+        };
 
         function startQuiz() {
             // 清空畫面狀態
             document.getElementById('quizGrid').innerHTML = '';
+            document.getElementById('optionsGrid').innerHTML = '';
             document.getElementById('score-display').innerHTML = '';
             document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('optionsPool').style.display = 'block';
+
+            currentOptionsDict = {};
 
             // 1. 隨機打亂總資料庫
             const shuffledData = [...allEquipmentData].sort(() => 0.5 - Math.random());
 
-            // 2. 抽出前 10 題作為測驗題目
+            // 2. 抽出前 10 題作為測驗圖片題目
             currentQuestions = shuffledData.slice(0, 10);
             const correctNames = currentQuestions.map(item => item.name);
 
@@ -292,34 +406,54 @@
             const incorrectNames = remainingData.slice(0, 15).map(item => item.name);
 
             // 4. 將 10 個正確答案 + 15 個錯誤選項合併，組成 25 個選單選項，並打亂順序
-            currentOptions = [...correctNames, ...incorrectNames].sort(() => 0.5 - Math.random());
-
-            // 5. 繪製測驗網格
-            renderGrid();
-        }
-
-        function renderGrid() {
-            const grid = document.getElementById('quizGrid');
+            let allOptionNames = [...correctNames, ...incorrectNames].sort(() => 0.5 - Math.random());
             
-            // 建立選單的 HTML (共用給 10 個選擇框)
-            let optionsHtml = '<option value="">-- 請選擇正確的裝備名稱 --</option>';
-            currentOptions.forEach(opt => {
-                optionsHtml += `<option value="${opt}">${opt}</option>`;
+            // 5. 將打亂後的 25 個選項配上 A~Y 的代號
+            const alphabet = generateAlphabet();
+            
+            const optionsGrid = document.getElementById('optionsGrid');
+            
+            allOptionNames.forEach((name, index) => {
+                const letter = alphabet[index];
+                currentOptionsDict[letter] = name; // 存入字典以便後續對答案： { 'A': '殲 20 機', ... }
+
+                // 產生選項池的 HTML
+                const optDiv = document.createElement('div');
+                optDiv.className = 'option-item';
+                optDiv.innerHTML = `<span class="option-letter">${letter}</span> ${name}`;
+                optionsGrid.appendChild(optDiv);
             });
 
-            // 產生 10 個圖片與選單卡片
+            // 6. 繪製測驗圖片網格
+            renderQuizGrid(alphabet);
+        }
+
+        function renderQuizGrid(alphabet) {
+            const grid = document.getElementById('quizGrid');
+            
+            // 建立供圖片下方下拉選擇的代號 HTML (A 到 Y)
+            let selectOptionsHtml = '<option value="">- 選代號 -</option>';
+            alphabet.forEach(letter => {
+                selectOptionsHtml += `<option value="${letter}">${letter}</option>`;
+            });
+
+            // 產生 10 個圖片卡片
             currentQuestions.forEach((q, index) => {
                 const card = document.createElement('div');
                 card.className = 'quiz-card';
                 card.id = `card-${index}`;
 
                 card.innerHTML = `
+                    <div class="q-number">${index + 1}</div>
                     <div class="img-container">
                         <img src="${q.image}" alt="裝備圖片" onerror="this.src='https://via.placeholder.com/300x200?text=找不到圖檔：${q.image}'">
                     </div>
-                    <select id="select-${index}">
-                        ${optionsHtml}
-                    </select>
+                    <div class="answer-area">
+                        <span>選項代號：</span>
+                        <select id="select-${index}">
+                            ${selectOptionsHtml}
+                        </select>
+                    </div>
                     <div class="result-msg" id="msg-${index}"></div>
                 `;
                 grid.appendChild(card);
@@ -335,12 +469,13 @@
                 const selectedCard = document.getElementById(`card-${index}`);
                 const msgElement = document.getElementById(`msg-${index}`);
                 
-                const userAnswer = selectElement.value;
+                const userLetter = selectElement.value; // 使用者選的代號 (例如 'C')
+                const userAnswerName = currentOptionsDict[userLetter]; // 根據代號查出對應的裝備名稱
                 
                 // 清除之前的狀態
                 selectedCard.classList.remove('correct', 'incorrect');
                 
-                if (userAnswer === q.name) {
+                if (userAnswerName === q.name) {
                     // 答對
                     score++;
                     selectedCard.classList.add('correct');
@@ -349,13 +484,23 @@
                 } else {
                     // 答錯
                     selectedCard.classList.add('incorrect');
-                    if (userAnswer === "") {
+                    
+                    // 找出正確答案的英文字母代號
+                    let correctLetter = "";
+                    for (let letter in currentOptionsDict) {
+                        if (currentOptionsDict[letter] === q.name) {
+                            correctLetter = letter;
+                            break;
+                        }
+                    }
+
+                    if (userLetter === "") {
                         msgElement.innerHTML = `<span class="incorrect-text">❌ 您未作答</span>`;
                     } else {
                         msgElement.innerHTML = `<span class="incorrect-text">❌ 答錯了</span>`;
                     }
-                    // 顯示正確答案
-                    msgElement.innerHTML += `<div class="true-answer">正確解答：<br><strong>${q.name}</strong></div>`;
+                    // 顯示正確答案與代號
+                    msgElement.innerHTML += `<div class="true-answer">正確解答：<br><strong>${correctLetter}. ${q.name}</strong></div>`;
                 }
             });
 
