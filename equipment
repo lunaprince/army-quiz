@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共軍裝備識別 - 隨機配對測驗</title>
+    <style>
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .instructions {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .top-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: bold;
+            border: none;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-primary:active { transform: scale(0.97); }
+
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-success:active { transform: scale(0.97); }
+
+        /* 測驗網格 */
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+            margin-bottom: 40px;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        /* 狀態樣式 */
+        .quiz-card.correct { border-color: #28a745; background-color: #f8fff9; }
+        .quiz-card.incorrect { border-color: #dc3545; background-color: #fffafb; }
+
+        .img-container {
+            width: 100%;
+            height: 200px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        select:focus { border-color: #007bff; }
+
+        .result-msg {
+            margin-top: 10px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .correct-text { color: #28a745; }
+        .incorrect-text { color: #dc3545; }
+        .true-answer { color: #333; font-size: 0.85em; margin-top: 5px; background: #fff3cd; padding: 4px 8px; border-radius: 4px; border: 1px solid #ffeeba;}
+
+        #score-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* 手機板適配 */
+        @media (max-width: 600px) {
+            .top-controls { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>共軍裝備識別 - 隨機配對測驗</h1>
+        <p class="instructions">
+            系統已為您隨機抽取 <strong>10 張裝備圖片</strong>，請從下拉選單的 <strong>25 個選項</strong>中，找出對應的正確裝備名稱。<br>
+            作答完畢後，點擊「送出答案」查看成績與正確解答。
+        </p>
+        <div class="top-controls">
+            <button class="btn btn-primary" onclick="startQuiz()">🔄 開始新測驗 (重新抽題)</button>
+            <button class="btn btn-success" id="submitBtn" onclick="checkAnswers()" style="display: none;">✅ 送出答案</button>
+        </div>
+        <div id="score-display"></div>
+    </div>
+
+    <div class="quiz-grid" id="quizGrid">
+        </div>
+
+    <script>
+        // 將 CSV 轉換為資料庫 (已排除最後兩個可能重複的無用檔)
+        const allEquipmentData = [
+            {"image": "ZTZ-99 式主戰坦克.jpeg", "name": "ZTZ-99 式主戰坦克"},
+            {"image": "ZTZ-96A 式主戰坦克.jpeg", "name": "ZTZ-96A 式主戰坦克"},
+            {"image": "ZTD-05 式兩棲突擊車.jpeg", "name": "ZTD-05 式兩棲突擊車"},
+            {"image": "ZBD-05 型兩棲裝甲步兵戰鬥車.jpeg", "name": "ZBD-05 型兩棲裝甲步兵戰鬥車"},
+            {"image": "ZBD-03 式履帶式傘兵戰車.jpeg", "name": "ZBD-03 式履帶式傘兵戰車"},
+            {"image": "ZBD-04 式裝甲步兵戰鬥車.jpeg", "name": "ZBD-04 式裝甲步兵戰鬥車"},
+            {"image": "ZBD-04A 式裝甲步兵戰鬥車.jpeg", "name": "ZBD-04A 式裝甲步兵戰鬥車"},
+            {"image": "ZSL-92 式輪式步兵戰鬥車.jpeg", "name": "ZSL-92 式輪式步兵戰鬥車"},
+            {"image": "ZBL-08 式輪式步兵戰鬥車.jpeg", "name": "ZBL-08 式輪式步兵戰鬥車"},
+            {"image": "猛士型突擊車.jpeg", "name": "猛士型突擊車"},
+            {"image": "ZTL-11 式輪式裝甲突擊車.jpeg", "name": "ZTL-11 式輪式裝甲突擊車"},
+            {"image": "PTL-02 式輪式突擊炮.jpeg", "name": "PTL-02 式輪式突擊炮"},
+            {"image": "山貓 8x8 全地形車.jpeg", "name": "山貓 8x8 全地形車"},
+            {"image": "PHZ-89 式 122 公釐多管火箭砲.jpeg", "name": "PHZ-89 式 122 公釐多管火箭砲"},
+            {"image": "PHL-191 式遠程多管火箭砲.jpeg", "name": "PHL-191 式遠程多管火箭砲"},
+            {"image": "PHL-03 式 300 公釐火箭砲.jpeg", "name": "PHL-03 式 300 公釐火箭砲"},
+            {"image": "紅箭 8 型反坦克飛彈.jpeg", "name": "紅箭 8 型反坦克飛彈"},
+            {"image": "紅箭 9 型反坦克裝甲車.jpeg", "name": "紅箭 9 型反坦克裝甲車"},
+            {"image": "紅箭 10 履式反坦克導彈發射車.jpeg", "name": "紅箭 10 履式反坦克導彈發射車"},
+            {"image": "紅箭 73 型反坦克飛彈.jpeg", "name": "紅箭 73 型反坦克飛彈"},
+            {"image": "PLZ-05 式 155 公釐自走榴彈砲.jpeg", "name": "PLZ-05 式 155 公釐自走榴彈砲"},
+            {"image": "PLZ-07 式 122 公釐自走榴彈砲.jpeg", "name": "PLZ-07 式 122 公釐自走榴彈砲"},
+            {"image": "PLL-05 式 120 公釐自走迫榴砲.jpeg", "name": "PLL-05 式 120 公釐自走迫榴砲"},
+            {"image": "PLL-09 式 122 公釐自走榴彈砲.jpeg", "name": "PLL-09 式 122 公釐自走榴彈砲"},
+            {"image": "PCP-001 式 82 公釐速射砲.jpeg", "name": "PCP-001 式 82 公釐速射砲"},
+            {"image": "PCL-161 式 122 公釐車載榴彈砲.png", "name": "PCL-161 式 122 公釐車載榴彈砲"},
+            {"image": "PCL-171 式 122 公釐車載榴彈砲.jpeg", "name": "PCL-171 式 122 公釐車載榴彈砲"},
+            {"image": "PCL-181 式 155 公釐車載榴彈砲.jpeg", "name": "PCL-181 式 155 公釐車載榴彈砲"},
+            {"image": "PLZ-89 式 122 公釐自走榴彈砲.jpeg", "name": "PLZ-89 式 122 公釐自走榴彈砲"},
+            {"image": "PLZ-10 式 120 公釐自走迫榴砲.jpeg", "name": "PLZ-10 式 120 公釐自走迫榴砲"},
+            {"image": "PCL-09 式 122 公釐車載榴彈砲.jpeg", "name": "PCL-09 式 122 公釐車載榴彈砲"},
+            {"image": "紅旗-7B(HQ-7B)防空導彈.jpeg", "name": "紅旗-7B(HQ-7B)防空導彈"},
+            {"image": "紅旗 16 型(HQ-16)防空飛彈.png", "name": "紅旗 16 型(HQ-16)防空飛彈"},
+            {"image": "紅旗 17 型(HQ-17)防空飛彈.jpeg", "name": "紅旗 17 型(HQ-17)防空飛彈"},
+            {"image": "紅旗-17A(HQ-17A)防空導彈.jpeg", "name": "紅旗-17A(HQ-17A)防空導彈"},
+            {"image": "前衛 19 號單兵肩射防空飛彈.jpeg", "name": "前衛 19 號單兵肩射防空飛彈"},
+            {"image": "紅纓 6 型(HN-6)單兵肩射防空飛彈.jpeg", "name": "紅纓 6 型(HN-6)單兵肩射防空飛彈"},
+            {"image": "PG-99 式雙 35 公釐牽引防空快砲.jpeg", "name": "PG-99 式雙 35 公釐牽引防空快砲"},
+            {"image": "PGZ-95 式 25 公釐自走防空快砲.jpeg", "name": "PGZ-95 式 25 公釐自走防空快砲"},
+            {"image": "PGZ-07 式雙 35 公釐自走防空快砲.jpeg", "name": "PGZ-07 式雙 35 公釐自走防空快砲"},
+            {"image": "PGL-625 式防空飛彈.jpeg", "name": "PGL-625 式防空飛彈"},
+            {"image": "直 8 型運輸直升機.jpeg", "name": "直 8 型運輸直升機"},
+            {"image": "直 9 型攻擊直升機.jpeg", "name": "直 9 型攻擊直升機"},
+            {"image": "武直 10 型攻擊直升機.jpeg", "name": "武直 10 型攻擊直升機"},
+            {"image": "米 17 型運輸直升機.jpeg", "name": "米 17 型運輸直升機"},
+            {"image": "卡 28 型反潛直升機.jpeg", "name": "卡 28 型反潛直升機"},
+            {"image": "武直 19 型攻擊直升機.jpeg", "name": "武直 19 型攻擊直升機"},
+            {"image": "直 20 型運輸直升機.jpeg", "name": "直 20 型運輸直升機"},
+            {"image": "東風 15 型彈道飛彈.jpeg", "name": "東風 15 型彈道飛彈"},
+            {"image": "東風 16 型彈道飛彈.png", "name": "東風 16 型彈道飛彈"},
+            {"image": "東風 17 型彈道飛彈.png", "name": "東風 17 型彈道飛彈"},
+            {"image": "東風 21 型彈道飛彈.jpeg", "name": "東風 21 型彈道飛彈"},
+            {"image": "東風 26 型彈道飛彈.jpeg", "name": "東風 26 型彈道飛彈"},
+            {"image": "東風 31 型彈道飛彈.jpeg", "name": "東風 31 型彈道飛彈"},
+            {"image": "東風 41 型洲際彈道飛彈.jpeg", "name": "東風 41 型洲際彈道飛彈"},
+            {"image": "東風 100 型超音速巡弋飛彈.jpeg", "name": "東風 100 型超音速巡弋飛彈"},
+            {"image": "071 型兩棲船塢登陸艦.jpeg", "name": "071 型兩棲船塢登陸艦"},
+            {"image": "072A 型戰車登陸艦.jpeg", "name": "072A 型戰車登陸艦"},
+            {"image": "073A 型登陸艦.jpeg", "name": "073A 型登陸艦"},
+            {"image": "074 型登陸艦.jpeg", "name": "074 型登陸艦"},
+            {"image": "075 型兩棲攻擊艦.jpeg", "name": "075 型兩棲攻擊艦"},
+            {"image": "MLP 半潛船.jpeg", "name": "MLP 半潛船"},
+            {"image": "726 型野馬級氣墊艇.jpeg", "name": "726 型野馬級氣墊艇"},
+            {"image": "728 型野牛級氣墊艇.png", "name": "728 型野牛級氣墊艇"},
+            {"image": "遼寧號航空母艦(CV-16-001 型).jpeg", "name": "遼寧號航空母艦(CV-16/001 型)"},
+            {"image": "山東號航空母艦(CV-17-002 型).jpeg", "name": "山東號航空母艦(CV-17/002 型)"},
+            {"image": "福建號航空母艦(CV-18-003 型).jpeg", "name": "福建號航空母艦(CV-18/003 型)"},
+            {"image": "殲轟 7 機.jpeg", "name": "殲轟 7 機"},
+            {"image": "殲 10 機.jpeg", "name": "殲 10 機"},
+            {"image": "殲 11 機.jpeg", "name": "殲 11 機"},
+            {"image": "殲 15 機.jpeg", "name": "殲 15 機"},
+            {"image": "殲 16D 機.jpeg", "name": "殲 16D 機"},
+            {"image": "殲 16 機.jpeg", "name": "殲 16 機"},
+            {"image": "蘇愷 35 機.jpeg", "name": "蘇愷 35 機"},
+            {"image": "殲 20 機.jpeg", "name": "殲 20 機"},
+            {"image": "殲 35 機.jpeg", "name": "殲 35 機"},
+            {"image": "轟 6 轟炸機.jpeg", "name": "轟 6 轟炸機"},
+            {"image": "運 8 反潛機.jpeg", "name": "運 8 反潛機"},
+            {"image": "運 8 技術偵察機.jpeg", "name": "運 8 技術偵察機"},
+            {"image": "運 8 遠程干擾機.jpeg", "name": "運 8 遠程干擾機"},
+            {"image": "運 9 型電偵機.jpeg", "name": "運 9 型電偵機"},
+            {"image": "空警 200 預警機.jpeg", "name": "空警 200 預警機"},
+            {"image": "空警 500 預警機.jpeg", "name": "空警 500 預警機"},
+            {"image": "空警 600 預警機.jpeg", "name": "空警 600 預警機"},
+            {"image": "空警 2000 預警機.jpeg", "name": "空警 2000 預警機"},
+            {"image": "運 20 型運輸機.jpeg", "name": "運 20 型運輸機"},
+            {"image": "伊爾 76 型運輸機.jpeg", "name": "伊爾 76 型運輸機"},
+            {"image": "BZK-005 戰略無人偵察機.jpeg", "name": "BZK-005 戰略無人偵察機"},
+            {"image": "BZK-007 無人偵察機.jpeg", "name": "BZK-007 無人偵察機"},
+            {"image": "殲 6 無人攻擊機.jpeg", "name": "殲 6 無人攻擊機"},
+            {"image": "哈比-JWS-01 反輻射無人機.jpeg", "name": "哈比/JWS-01 反輻射無人機"},
+            {"image": "無偵 7 無人戰略偵察機.jpeg", "name": "無偵 7 無人戰略偵察機"},
+            {"image": "無偵 10 無人戰略偵察機.jpeg", "name": "無偵 10 無人戰略偵察機"},
+            {"image": "攻擊 2 型無人攻擊機(翼龍).jpeg", "name": "攻擊 2 型無人攻擊機(翼龍)"},
+            {"image": "攻擊 11 型無人攻擊機(利劍).jpeg", "name": "攻擊 11 型無人攻擊機(利劍)"},
+            {"image": "KVD-002 無人偵察機.jpeg", "name": "KVD-002 無人偵察機"},
+            {"image": "TB-001 無人機(雙尾蠍).jpeg", "name": "TB-001 無人機(雙尾蠍)"}
+        ];
+
+        let currentQuestions = [];
+        let currentOptions = [];
+
+        function startQuiz() {
+            // 清空畫面狀態
+            document.getElementById('quizGrid').innerHTML = '';
+            document.getElementById('score-display').innerHTML = '';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+
+            // 1. 隨機打亂總資料庫
+            const shuffledData = [...allEquipmentData].sort(() => 0.5 - Math.random());
+
+            // 2. 抽出前 10 題作為測驗題目
+            currentQuestions = shuffledData.slice(0, 10);
+            const correctNames = currentQuestions.map(item => item.name);
+
+            // 3. 從剩下的資料中抽出 15 個錯誤選項
+            const remainingData = shuffledData.slice(10);
+            const incorrectNames = remainingData.slice(0, 15).map(item => item.name);
+
+            // 4. 將 10 個正確答案 + 15 個錯誤選項合併，組成 25 個選單選項，並打亂順序
+            currentOptions = [...correctNames, ...incorrectNames].sort(() => 0.5 - Math.random());
+
+            // 5. 繪製測驗網格
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('quizGrid');
+            
+            // 建立選單的 HTML (共用給 10 個選擇框)
+            let optionsHtml = '<option value="">-- 請選擇正確的裝備名稱 --</option>';
+            currentOptions.forEach(opt => {
+                optionsHtml += `<option value="${opt}">${opt}</option>`;
+            });
+
+            // 產生 10 個圖片與選單卡片
+            currentQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+                card.id = `card-${index}`;
+
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${q.image}" alt="裝備圖片" onerror="this.src='https://via.placeholder.com/300x200?text=找不到圖檔：${q.image}'">
+                    </div>
+                    <select id="select-${index}">
+                        ${optionsHtml}
+                    </select>
+                    <div class="result-msg" id="msg-${index}"></div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            const total = currentQuestions.length;
+
+            currentQuestions.forEach((q, index) => {
+                const selectElement = document.getElementById(`select-${index}`);
+                const selectedCard = document.getElementById(`card-${index}`);
+                const msgElement = document.getElementById(`msg-${index}`);
+                
+                const userAnswer = selectElement.value;
+                
+                // 清除之前的狀態
+                selectedCard.classList.remove('correct', 'incorrect');
+                
+                if (userAnswer === q.name) {
+                    // 答對
+                    score++;
+                    selectedCard.classList.add('correct');
+                    msgElement.innerHTML = `<span class="correct-text">✔️ 答對了！</span>`;
+                    selectElement.disabled = true; // 答對鎖定選項
+                } else {
+                    // 答錯
+                    selectedCard.classList.add('incorrect');
+                    if (userAnswer === "") {
+                        msgElement.innerHTML = `<span class="incorrect-text">❌ 您未作答</span>`;
+                    } else {
+                        msgElement.innerHTML = `<span class="incorrect-text">❌ 答錯了</span>`;
+                    }
+                    // 顯示正確答案
+                    msgElement.innerHTML += `<div class="true-answer">正確解答：<br><strong>${q.name}</strong></div>`;
+                }
+            });
+
+            // 顯示總分
+            const scoreDisplay = document.getElementById('score-display');
+            const percentage = Math.round((score / total) * 100);
+            
+            let comment = "";
+            if (percentage === 100) comment = "太神啦！💯 完全正確！";
+            else if (percentage >= 80) comment = "非常優秀！👍 繼續保持！";
+            else if (percentage >= 60) comment = "及格邊緣！加油！📚";
+            else comment = "需要再多複習喔！💪";
+
+            scoreDisplay.innerHTML = `本次測驗得分： <span style="color:#007bff;">${score} / ${total}</span> 題 (${percentage}%)<br><span style="font-size: 0.7em; color: #555;">${comment}</span>`;
+            
+            // 捲動到最上方看分數
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 預設一進入網頁就自動產生第一份考題
+        startQuiz();
+    </script>
+</body>
+</html>
